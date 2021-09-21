@@ -2,16 +2,15 @@ package cnj.actuator;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
-import org.springframework.boot.availability.AvailabilityState;
 import org.springframework.boot.availability.LivenessState;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -58,9 +57,20 @@ class HealthRestController {
 	private final ApplicationContext applicationContext;
 
 	HealthRestController(
-		ObjectProvider<AvailabilityState> availabilityStates,
 		ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+	}
+
+	@EventListener
+	public void onEvent(AvailabilityChangeEvent<LivenessState> event) {
+
+		var message = switch (event.getState()) {
+			case BROKEN -> "ruh roh!";
+			case CORRECT -> "everything's A-OK!";
+		};
+		System.out.println("the " + AvailabilityChangeEvent.class.getName() +
+			" has changed. It is now " + message);
+
 	}
 
 	@PostMapping("/green")
