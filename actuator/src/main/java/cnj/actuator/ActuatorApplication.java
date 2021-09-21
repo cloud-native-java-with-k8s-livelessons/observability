@@ -12,10 +12,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Map;
 
 @SpringBootApplication
@@ -59,6 +61,14 @@ class HealthRestController {
 	HealthRestController(
 		ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+	}
+
+	@GetMapping("/wait")
+	Mono<Integer> relaxTakeItEasy() {
+		return Mono.just(0)
+			.doOnSubscribe(s -> System.out.println("starting the delay"))
+			.doFinally(s -> System.out.println("finishing the delay"))
+			.delayElement(Duration.ofSeconds(15));
 	}
 
 	@EventListener
