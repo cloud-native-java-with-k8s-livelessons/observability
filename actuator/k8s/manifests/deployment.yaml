@@ -23,14 +23,19 @@ spec:
         app: actuator
     spec:
       containers:
-      - image: gcr.io/bootiful/cnj-actuator:latest
-        imagePullPolicy: Always
-        name: cnj-actuator
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
+        - image: gcr.io/bootiful/cnj-actuator:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+          name: cnj-actuator
+          resources: { }
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
       terminationGracePeriodSeconds: 30
